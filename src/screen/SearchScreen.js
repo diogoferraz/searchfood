@@ -1,20 +1,32 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import SearchBar from '../components/SearchBar';
-import yelp from '../api/yelp';
+import useResults from '../hooks/useResults';
+import ResultsList from '../components/ResultsList';
 
 const SearchScreen = () => {
-  const [term, setTerm] = useState('');
-  const [results, setResults] = useState([]);
+  const [term, setTerm] = useState('pasta');
+  const [searchApi, results, errorMessage] = useResults();
 
-  return <View>
-    <SearchBar 
-      term={term} 
-      onTermChange={newTerm => setTerm(newTerm)}
-      onTermSubmit={() => console.log('submit')}/>
-    <Text>SearchScreen</Text>
-    <Text> We have found {results.length} results</Text>
-  </View>
+  const filterResultsByPrice = price => {
+    return results.filter(results => {
+      return results.price === price;
+    })
+  }
+
+  return (
+    <View>
+      <SearchBar
+        term={term}
+        onTermChange={setTerm}
+        onTermSubmit={() => searchApi(term)} />
+      {errorMessage ? <Text>{errorMessage}</Text> : null}
+      <Text> We have found {results.length} results</Text>
+      <ResultsList title={'Cost Effective'} results={filterResultsByPrice('$')} />
+      <ResultsList title={'Bit Pricier'} results={filterResultsByPrice('$$')} />
+      <ResultsList title={'Big Spender'} results={filterResultsByPrice('$$$')} />
+    </View>
+  )
 };
 
 const styles = StyleSheet.create({});
